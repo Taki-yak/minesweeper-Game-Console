@@ -1,0 +1,124 @@
+#include <iostream> // Include input/output stream library for cin and cout
+#include <cstdlib> // Include standard library for rand() and srand()
+#include <ctime> // Include time library for seeding srand()
+
+using namespace std; // Using standard namespace for input/output operations
+
+ const int size = 10; // Define the size of the game board
+ int mines = 10; // Define the number of mines
+
+int board[size][size] = {0}; // Initialize the game board with all zeros
+bool revealed[size][size] = {false}; // Initialize the revealed status of each cell in the board
+
+void initialize() {
+    int minesplace = 0;
+    while (minesplace < mines)
+        {
+        int x = rand() % size; // Generate random x coordinate
+        int y = rand() % size; // Generate random y coordinate
+        if (board[x][y] != -1) { // If there is no mine at this position
+            board[x][y] = -1; // Place a mine
+            minesplace++; // Increment the number of placed mines
+        }
+    }
+
+    // Fill in the numbers on the board
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+        if (board[i][j] != -1) {
+            int count = 0;
+                // Check all neighboring cells for mines
+        for (int dx = -1; dx <= 1; dx++) {
+                     for (int dy = -1; dy <= 1; dy++) {
+                        int nx = i + dx;
+                        int ny = j + dy;
+                        if (nx >= 0 && nx < size && ny >= 0 && ny < size && board[nx][ny] == -1) {
+                            count++; // Increment the count of adjacent mines
+            }
+                }
+                }
+                board[i][j] = count; // Assign the count to the position on the board
+                    }
+    }
+    }
+}
+
+void printboard(bool revealmines = false) {
+    cout << "  ";
+    for (int i = 0; i < size; i++)
+        cout << i << " ";
+    cout << endl;
+
+    for (int i = 0; i < size; i++) {
+        cout << i << " ";
+        for (int j = 0; j < size; j++) {
+            if (revealed[i][j] || (board[i][j] == -1 && revealmines))
+                cout << (board[i][j] == -1 ? "*" : to_string(board[i][j])) << " "; // Print mine or number at position
+            else
+                cout << ". "; // Print a hidden cell
+}
+        cout << endl;
+    }
+}
+
+void reveal(int x, int y) {
+    if (x < 0 || x >= size || y < 0 || y >= size || revealed[x][y])
+        return;
+
+    revealed[x][y] = true; // Mark the cell as revealed
+
+    // Recursive call to reveal neighboring cells if current cell is empty
+    if (board[x][y] == 0) {
+        for (int dx = -1; dx <= 1; ++dx) {
+            for (int dy = -1; dy <= 1; ++dy)
+                {
+                int nx = x + dx;
+                int ny = y + dy;
+                reveal(nx, ny);
+            }
+}
+}
+}
+
+int main() {
+    srand(time(0)); // Seed the random number generator
+    initialize(); // Initialize the game board
+
+    while (true) {
+        printboard(); // Print the current state of the board
+        int x, y;
+        cout << "give two numbers for row and column : ";
+        cin >> x >> y; // Get user input for row and column
+
+        if (x < 0 || x >= size || y < 0 || y >= size) { // Check if user input is within board limits
+            cout << "wrong input.\n";
+            continue;
+    }
+        if (board[x][y] == -1) { // Check if the selected cell is a mine
+            cout << "you hit a mine!\n";
+            printboard(true); // Reveal all mines
+            break;
+        } else {
+            reveal(x, y); // Reveal the selected cell and its neighbors
+    }
+
+        bool reveale = true;
+        for (int i = 0; i < size;i++) {
+            for (int j = 0; j < size; j++) {
+                if (!revealed[i][j] && board[i][j] != -1) {
+                    reveale = false;
+                    break;
+        }
+}
+            if (!reveale)
+                break;
+}
+
+        if (reveale) {
+            cout << "you won!\n"; // Print win message
+            break;
+}
+    }
+
+    return 0;
+}
